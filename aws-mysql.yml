@@ -32,7 +32,7 @@ plans:
     cores: 2
     mysql_version: 5.7
     storage_gb: 5
-    subsume: false
+    storage_type: "gp2"
 - name: medium
   id: f2ae0bb7-6921-43b7-bae7-6d1fe1c5d1c6
   description: 'Beta - MySQL v5.7, minimum 4 cores, minimum 8GB ram, 10GB storage'
@@ -41,7 +41,7 @@ plans:
     cores: 4
     mysql_version: 5.7
     storage_gb: 10
-    subsume: false
+    storage_type: "gp2"
 - name: large
   id: a5fea013-e87f-488f-969d-1cf038881b57
   description: 'Beta - MySQL v5.7, minimum 8 cores, minimum 16GB ram, 20GB storage'
@@ -50,13 +50,12 @@ plans:
     cores: 8
     mysql_version: 5.7
     storage_gb: 20
-    subsume: false
+    storage_type: "gp2"
 provision:
   plan_inputs:
   - field_name: cores
-    required: true
     type: integer
-    details: Minimum number of cores for service instance.
+    details: Deprecated - Minimum number of cores for service instance. Suggest setting `instance_class` property instead.
     default: 2
     constraints:
       maximum: 64
@@ -65,23 +64,35 @@ provision:
   - field_name: mysql_version
     required: true
     type: string
-    details: The version for the mysql instance.
-    default: 5.7
-    enum:
-      5.6: MySQL v5.6
-      5.7: MySQL v5.7
+    details: |
+      The version for the MySQL instance. Can be any supported version by the provider.
+      If `auto_minor_version_upgrade` is enabled, you can provide a prefix of the version such as 5.7 (for 5.7.10).
+      See https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MySQL.Concepts.VersionMgmt.html#MySQL.Concepts.VersionMgmt.Supported
   - field_name: storage_gb
     required: true
     type: number
     details: Size of storage volume for service instance.
-    default: 5
+    default: 100
     constraints:
       maximum: 4096
       minimum: 5
-  - field_name: subsume
-    type: boolean
-    details: Indicates an existing PostgreSQL instnace should be subsumed      
   user_inputs:
+  - field_name: option_group_name
+    type: string
+    default: null
+    nullable: true
+    details: |
+      Name of the DB option group to associate.
+      MySQL offers additional features such as the audit plugin or Memcached to manage data and database or to provide additional security for the database.
+      RDS uses option groups to enable and configure these features.
+  - field_name: storage_type
+    type: string
+    details: Type of storage to be used. One of "standard" (magnetic), "gp2" (general purpose SSD), or "io1" (provisioned IOPS SSD).
+    default: "io1"
+  - field_name: iops
+    type: number
+    details: The amount of provisioned IOPS. In order for this property to take effect, `storage_type` must be set to `io1`.
+    default: 3000
   - field_name: use_tls
     type: boolean
     details: Use TLS for connection
@@ -117,6 +128,7 @@ provision:
     default: vsbdb
     constraints:
       maxLength: 64
+    prohibit_update: true
   - field_name: publicly_accessible
     type: boolean
     details: Make instance public if true
@@ -166,10 +178,12 @@ provision:
     type: boolean
     details: Allow minor version upgrades automatically during the maintenance window
     default: true
-  - field_name: maintenance_day
-    type: string
+  - <<: &nullable_string
+      type: string
+      default: null
+      nullable: true
+    field_name: maintenance_day
     details: The preferred maintenance day
-    default: Sun
     enum:
       Sun: Sunday
       Mon: Monday
@@ -178,11 +192,10 @@ provision:
       Thu: Thursday
       Fri: Friday
       Sat: Saturday
-  - field_name: maintenance_start_hour
-    type: string
+  - <<: *nullable_string
+    field_name: maintenance_start_hour
     details: The preferred maintenance start hour
-    default: "00"
-    enum:
+    enum: &hour_enum
       "00": 12 am
       "01": 1 am
       "02": 2 am
@@ -207,53 +220,92 @@ provision:
       "21": 9 pm
       "22": 10 pm
       "23": 11 pm
-  - field_name: maintenance_start_min
+  - <<: *nullable_string
+    field_name: maintenance_start_min
     type: string
     details: The preferred maintenance start minute
-    default: "00"
-    enum:
+    enum: &minute_enum
       "00": Top of the hour
       "15": 15 minutes
       "30": 30 minutes
       "45": 45 minutes
-  - field_name: maintenance_end_hour
-    type: string
+  - <<: *nullable_string
+    field_name: maintenance_end_hour
     details: The preferred maintenance end hour
-    default: "00"
-    enum:
-      "00": 12 am
-      "01": 1 am
-      "02": 2 am
-      "03": 3 am
-      "04": 4 am
-      "05": 5 am
-      "06": 6 am
-      "07": 7 am
-      "08": 8 am
-      "09": 9 am
-      "10": 10 am
-      "11": 11 am
-      "12": 12 pm
-      "13": 1 pm
-      "14": 2 pm
-      "15": 3 pm
-      "16": 4 pm
-      "17": 5 pm
-      "18": 6 pm
-      "19": 7 pm
-      "20": 8 pm
-      "21": 9 pm
-      "22": 10 pm
-      "23": 11 pm
-  - field_name: maintenance_end_min
-    type: string
+    enum: *hour_enum
+  - <<: *nullable_string
+    field_name: maintenance_end_min
     details: The preferred maintenance end minute
-    default: "00"
-    enum:
-      "00": Top of the hour
-      "15": 15 minutes
-      "30": 30 minutes
-      "45": 45 minutes
+    enum: *minute_enum
+  - field_name: deletion_protection
+    type: boolean
+    default: false
+    details: |
+      Whether the DB instance should have deletion protection enabled.
+      The database can't be deleted when this value is set to `true`.
+  - field_name: backup_retention_period
+    type: number
+    details: |
+      The number of days (1-35) for which automatic backups are kept.
+      Set the value to 0 to disable automated backups.
+      An outage occurs if you change the backup retention period from 0 to a nonzero value or vice versa.
+      This applies to both Single-AZ and Multi-AZ DB instances.
+    default: 7
+  - <<: *nullable_string
+    field_name: backup_window
+    details: |
+      The daily time range in UTC during which automated backups are created, e.g.: "09:46-10:16".
+      Must not overlap with the maintenance window. If not set, uses the default for the region
+      (see https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html#USER_WorkingWithAutomatedBackups.BackupWindow)'
+  - field_name: delete_automated_backups
+    type: boolean
+    details: Specifies whether to remove automated backups immediately after the DB instance is deleted
+    default: true
+  - field_name: copy_tags_to_snapshot
+    type: boolean
+    details: Copy all instance tags to snapshots
+    default: true
+  - field_name: monitoring_interval
+    type: number
+    details: |
+      The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance.
+      To disable collecting Enhanced Monitoring metrics, specify 0. Valid Values: 0, 1, 5, 10, 15, 30, 60.
+      A `monitoring_role_arn` value is required if you specify a `monitoring_interval` value other than 0.
+      To read about Enhanced Monitoring metrics see https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.overview.html.
+    default: 0
+    constraints:
+      maximum: 60
+      minimum: 0
+  - field_name: monitoring_role_arn
+    type: string
+    details: |
+      Enhanced Monitoring requires permission to act on your behalf to send OS metric information to CloudWatch Logs.
+      This property represents the ARN for the IAM role that permits RDS to send enhanced monitoring metrics to CloudWatch Logs.
+      To read about setting up and enabling Enhanced Monitoring see https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.Enabling.html.
+    default: ""
+  - field_name: performance_insights_enabled
+    type: boolean
+    details: Specifies whether Performance Insights are enabled (see https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.html).
+    default: false
+  - field_name: performance_insights_kms_key_id
+    type: string
+    details: |
+      The ARN for the KMS key to encrypt Performance Insights data.
+      When specifying `performance_insights_kms_key_id`, `performance_insights_enabled` needs to be set to true.
+      Once KMS key is set, it can never be changed.
+    default: ""
+  - field_name: performance_insights_retention_period
+    type: number
+    details: |
+      The number of days to retain Performance Insights data.
+      When specifying `performance_insights_retention_period`, `performance_insights_enabled` needs to be set to true.
+      The default is 7 days.
+      The following values are valid: 7, month * 31, where month is a number of months from 1-23, 731.
+      For example, the following values are valid: 93 (3 months * 31), 341 (11 months * 31), 589 (19 months * 31), and 731.
+      If you specify a retention period such as 94, which is not a valid value, RDS issues an error.
+    default: 7
+    constraints:
+      minimum: 7
   computed_inputs:
   - name: labels
     default: ${json.marshal(request.default_labels)}
@@ -265,10 +317,6 @@ provision:
     type: string
   - name: engine_version
     default: ${mysql_version}
-    overwrite: true
-    type: string
-  - name: maintenance_window
-    default: ${maintenance_day}:${maintenance_start_hour}:${maintenance_start_min}-${maintenance_day}:${maintenance_end_hour}:${maintenance_end_min}
     overwrite: true
     type: string
   template_refs:
