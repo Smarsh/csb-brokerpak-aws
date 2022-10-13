@@ -65,7 +65,4 @@ service_definitions:
 - aws-dynamodb.yml
 - aws-aurora-postgresql.yml
 - aws-aurora-mysql.yml
-
-
-
-
+- aws-docdb.yml
