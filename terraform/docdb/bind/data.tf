@@ -15,3 +15,6 @@
 data "aws_iam_policy" "doc_db_full_access" {
   arn = "arn:aws:iam::aws:policy/AmazonDocDBFullAccess"
 }
+
+###  ^^ this should work just fine, I don't think we need to do an IAM policy doc
+### remove these comments if so, wanted to leave a note while we itterate on this

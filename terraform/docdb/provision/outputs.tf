@@ -12,16 +12,86 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "docdb_cluster_instances_arn" { value = var.docdb_cluster_arn }
-output "docdb_cluster_instances_db_subnet_group_name" {value = var.db_subnet_group_name }
-#output "docdb_cluster_instances_dbi_resource_id " {value = }
-#output "docdb_cluster_instances_endpoint" {value = }
-# ^ we're not sure where these values come from yet
-output "docdb_cluster_instances_engine_version" {value = var.engine_version }
-output "docdb_cluster_instances_kms_key_id" {value = var.kms_key_id}
-output "docdb_cluster_instances_port" {value = var.port}
-output "docdb_cluster_instances_preferred_backup_window" {value = var.preferred_backup_window }
-output "docdb_cluster_instances_storage_encrypted" {value = var.storage_encrypted}
-output "docdb_cluster_instances_tags_all" {value = var.tags_all}
-output "docdb_cluster_instances_writer" {value = var.writter}
-output "docdb_cluster_instances_ca_cert_identifier" {value = var.ca_cert_identifier}
+# docdb_cluster outputs
+
+output "docdb_cluster_instances_arn" {
+  description = "Amazon Resource Name (ARN) of the cluster"
+  value = aws_docdb_cluster.docdb_cluster.arn
+}
+
+output "cluster_members" {
+  description = "List of DocDB Instances that are a part of this cluster"
+  value = aws_docdb_cluster.docdb_cluster.cluster_members
+}
+
+output "cluster_resource_id" {
+  description = "The DocDB Cluster Resource ID"
+  value = aws_docdb_cluster.docdb_cluster.cluster_resource_id
+}
+
+output "endpoint" {
+  description = "The DNS address of the DocDB instance"
+  value = aws_docdb_cluster.docdb_cluster.endpoint
+}
+
+output "hosted_zone_id" {
+  description = "The Route53 Hosted Zone ID of the endpoint"
+  value = aws_docdb_cluster.docdb_cluster.hosted_zone_id
+}
+
+output "id" {
+  description = "The DocDB Cluster Identifier"
+  value = aws_docdb_cluster.docdb_cluster.id
+}
+
+output "reader_endpoint" {
+  description = "A read-only endpoint for the DocDB cluster, automatically load-balanced across replicas"
+  value = aws_docdb_cluster.docdb_cluster.reader_endpoint
+}
+
+# docdb_cluster_instances outputs
+
+  output "db_subnet_group_name" {
+  description = "The DB subnet group to associate with this DB instance"
+  value = aws_docdb_cluster_instance.docdb_cluster_instances.db_subnet_group_name
+}
+
+output "dbi_resource_id" {
+  description = "The region-unique, immutable identifier for the DB instance"
+  value = aws_docdb_cluster_instance.docdb_cluster_instances.dbi_resource_id
+}
+
+output "cluster_instance_endpoint" {
+  description = "The DNS address for this instance. May not be writable"
+  value = aws_docdb_cluster_instance.docdb_cluster_instances.endpoint
+}
+
+output "engine_version" {
+  description = "The database engine version"
+  value = aws_docdb_cluster_instance.docdb_cluster_instances.engine_version
+}
+
+output "port" {
+  description = "The database port"
+  value = aws_docdb_cluster_instance.docdb_cluster_instances.port
+}
+
+output "preferred_backup_window" {
+  description = "The daily time range during which automated backups are created if automated backups are enabled"
+  value = aws_docdb_cluster_instance.docdb_cluster_instances.preferred_backup_window
+}
+
+output "storage_encrypted " {
+  description = "Specifies whether the DB cluster is encrypted"
+  value = aws_docdb_cluster_instance.docdb_cluster_instances.storage_encrypted
+}
+
+output "writer" {
+  description = " Boolean indicating if this instance is writable. False indicates this instance is a read replica"
+  value = aws_docdb_cluster_instance.docdb_cluster_instances.writer
+}
+
+output "ca_cert_identifier" {
+  description = "(Optional) The identifier of the CA certificate for the DB instance."
+  value = aws_docdb_cluster_instance.docdb_cluster_instances.ca_cert_identifier
+}

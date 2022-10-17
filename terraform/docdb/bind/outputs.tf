@@ -20,12 +20,5 @@ output "secret_access_key" {
   value     = aws_iam_access_key.access_key.secret
   sensitive = true
 }
-output "docdb_cluster_arn" { value = var.docdb_cluster_arn }
-output "docdb_cluster_members" { value = var.docdb_cluster_members }
-output "docdb_cluster_resource_id" { value = var.docdb_cluster_resource_id }
-output "docdb_cluster_endpoint" { value = var.docdb_cluster_endpoint }
-output "docdb_cluster_hosted_zone_id" { value = var.docdb_cluster_hosted_zone_id }
-output "docdb_cluster_id" { value = var.docdb_cluster_id }
-output "docdb_cluster_reader_endpoint" { value = var.docdb_cluster_reader_endpoint }
-output "docdb_cluster_tags_all" { value = var.docdb_cluster_tags_all }
-output "region" { value = var.region }
+
+# WIP
