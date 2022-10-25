@@ -14,7 +14,7 @@
 
 # docdb_cluster outputs
 
-output "docdb_cluster_instances_arn" {
+output "docdb_cluster_arn" {
   description = "Amazon Resource Name (ARN) of the cluster"
   value = aws_docdb_cluster.docdb_cluster.arn
 }

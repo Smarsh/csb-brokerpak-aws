@@ -18,11 +18,60 @@ id: ____
 description: CSB AWS DocDB
 display_name: CSB AWS DocDB
 image_url: file://service-images/csb.png
-documentation_url: 
+documentation_url: https://aws.amazon.com/documentdb/
 provider_display_name: VMware
 support_url: https://aws.amazon.com/documentdb/
 tags: [aws, docdb]
 plan_updateable: true
+plans:
+- name: medium
+  id: WIP
+  description: 'db.t3.medium: 2 CPU cores, 4 GB memory'
+  display_name: "medium"
+  properties:
+    subsume: false
+- name: large
+  id: WIP
+  description: 'db.r6g.large: 2 CPU cores, 16 GB memory'
+  display_name: "large"
+  properties:
+    subsume: false
+- name: xlarge
+  id: WIP
+  description: 'db.r6g.xlarge: 4 CPU cores, 32 GB memory'
+  display_name: "xlarge"
+  properties:
+    subsume: false
+- name: 2xlarge
+  id: WIP
+  description: 'db.r6g.2xlarge: 8 CPU cores, 64 GB memory'
+  display_name: "2xlarge"
+  properties:
+    subsume: false
+- name: 4xlarge
+  id: WIP
+  description: 'db.r6g.4xlarge: 16 CPU cores, 128 GB memory'
+  display_name: "4xlarge"
+  properties:
+    subsume: false
+- name: 8xlarge
+  id: WIP
+  description: 'db.r6g.8xlarge: 32 CPU cores, 256 GB memory'
+  display_name: "8xlarge"
+  properties:
+    subsume: false
+- name: 12xlarge
+  id: WIP
+  description: 'db.r6g.12xlarge: 48 CPU cores, 384 GB memory'
+  display_name: "12xlarge"
+  properties:
+    subsume: false
+- name: 16xlarge
+  id: WIP
+  description: 'db.r6g.16xlarge: 64 CPU cores, 512 GB memory'
+  display_name: "16xlarge"
+  properties:
+    subsume: false
 provision:
   user_inputs:
     - field_name: master_username
