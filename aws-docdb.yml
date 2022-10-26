@@ -14,65 +14,65 @@
 ---
 version: 1
 name: csb-aws-docdb
-id: ____
-description: CSB AWS DocDB
-display_name: CSB AWS DocDB
+id: 0b05ecb5-88b8-422f-9814-9862810fc73f
+description: Amazon DocumentDB is a managed proprietary NoSQL database service that supports document data structures
+display_name: AWS DocumentDB
 image_url: file://service-images/csb.png
 documentation_url: https://aws.amazon.com/documentdb/
-provider_display_name: VMware
 support_url: https://aws.amazon.com/documentdb/
 tags: [aws, docdb]
 plan_updateable: true
 plans:
 - name: medium
-  id: WIP
+  id: 34ba9163-31c5-426b-944e-a1c065926669
   description: 'db.t3.medium: 2 CPU cores, 4 GB memory'
   display_name: "medium"
   properties:
     subsume: false
 - name: large
-  id: WIP
+  id: 22f74b01-0448-4656-959c-2b62304d35ef
   description: 'db.r6g.large: 2 CPU cores, 16 GB memory'
   display_name: "large"
   properties:
     subsume: false
 - name: xlarge
-  id: WIP
+  id: fbd7ec00-53ca-4ba7-8c2c-29f046f7a566
   description: 'db.r6g.xlarge: 4 CPU cores, 32 GB memory'
   display_name: "xlarge"
   properties:
     subsume: false
 - name: 2xlarge
-  id: WIP
+  id: 87b592d9-bb10-433e-9bda-1caef193d226
   description: 'db.r6g.2xlarge: 8 CPU cores, 64 GB memory'
   display_name: "2xlarge"
   properties:
     subsume: false
 - name: 4xlarge
-  id: WIP
+  id: d3b7e134-a352-4338-8dad-f58c18d3579a
   description: 'db.r6g.4xlarge: 16 CPU cores, 128 GB memory'
   display_name: "4xlarge"
   properties:
     subsume: false
 - name: 8xlarge
-  id: WIP
+  id: 043e8acd-094d-47ed-aea6-9b488aaafab9
   description: 'db.r6g.8xlarge: 32 CPU cores, 256 GB memory'
   display_name: "8xlarge"
   properties:
     subsume: false
 - name: 12xlarge
-  id: WIP
+  id: 1187b327-47c2-45d7-98fb-4ad6de1e2b2d
   description: 'db.r6g.12xlarge: 48 CPU cores, 384 GB memory'
   display_name: "12xlarge"
   properties:
     subsume: false
 - name: 16xlarge
-  id: WIP
+  id: 13a8f833-52ed-4447-9856-de60848cb7f7
   description: 'db.r6g.16xlarge: 64 CPU cores, 512 GB memory'
   display_name: "16xlarge"
   properties:
     subsume: false
 provision:
+  plan _inputs:
   user_inputs:
     - field_name: master_username
       type: string
