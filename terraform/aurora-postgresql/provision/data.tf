@@ -11,5 +11,27 @@ data "aws_subnets" "all" {
 }
 
 locals {
-  port = 5432
+  port          = 5432
+  serverless    = var.serverless_max_capacity != null || var.serverless_min_capacity != null
+  major_version = split(".", var.engine_version)[0]
+
+  rds_vpc_security_group_ids = length(var.rds_vpc_security_group_ids) == 0 ? [aws_security_group.rds_sg[0].id] : split(",", var.rds_vpc_security_group_ids)
+  subnet_group               = length(var.rds_subnet_group) > 0 ? var.rds_subnet_group : aws_db_subnet_group.rds_private_subnet[0].name
+
+  is_maintenance_window_blank = length(compact([
+    var.preferred_maintenance_day,
+    var.preferred_maintenance_start_hour,
+    var.preferred_maintenance_end_hour,
+    var.preferred_maintenance_start_min,
+    var.preferred_maintenance_end_min
+  ])) == 0
+
+  preferred_maintenance_window = local.is_maintenance_window_blank ? null : format("%s:%s:%s-%s:%s:%s",
+    var.preferred_maintenance_day,
+    var.preferred_maintenance_start_hour,
+    var.preferred_maintenance_start_min,
+    var.preferred_maintenance_day,
+    var.preferred_maintenance_end_hour,
+    var.preferred_maintenance_end_min
+  )
 }

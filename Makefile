@@ -7,7 +7,7 @@ help: ## list Makefile targets
 
 ###### Setup ##################################################################
 IAAS=aws
-GO-VERSION = 1.19.2
+GO-VERSION = 1.19.3
 GO-VER = go$(GO-VERSION)
 CSB_VERSION := $(or $(CSB_VERSION), $(shell grep 'github.com/cloudfoundry/cloud-service-broker' go.mod | grep -v replace | awk '{print $$NF}' | sed -e 's/v//'))
 CSB_RELEASE_VERSION := $(CSB_VERSION) # this doesnt work well if we did make latest-csb.
@@ -18,6 +18,7 @@ DOCKER_OK := $(shell which docker 1>/dev/null 2>/dev/null; echo $$?)
 
 ####### broker environment variables
 PAK_CACHE=/tmp/.pak-cache
+BROKERPAK_UPDATES_ENABLED := true
 SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), aws-broker)
 SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), aws-broker-pw)
 PARALLEL_JOB_COUNT := $(or $(PARALLEL_JOB_COUNT), 10000)
@@ -35,6 +36,7 @@ GOFMT=gofmt
 BROKER_GO_OPTS=PORT=8080 \
 				DB_TYPE=sqlite3 \
 				DB_PATH=/tmp/csb-db \
+				BROKERPAK_UPDATES_ENABLED=$(BROKERPAK_UPDATES_ENABLED) \
 				SECURITY_USER_NAME=$(SECURITY_USER_NAME) \
 				SECURITY_USER_PASSWORD=$(SECURITY_USER_PASSWORD) \
 				AWS_ACCESS_KEY_ID='$(AWS_ACCESS_KEY_ID)' \
@@ -193,7 +195,6 @@ clean: ## delete build files
 	- rm -f $(IAAS)-services-*.brokerpak
 	- rm -f ./cloud-service-broker
 	- rm -f ./brokerpak-user-docs.md
-	- rm -rf $(PAK_CACHE)
 
 $(PAK_CACHE):
 	@echo "Folder $(PAK_CACHE) does not exist. Creating it..."
@@ -212,15 +213,21 @@ local-csb: ## point to a local CSB repo
 ###### lint ###################################################################
 
 .PHONY: lint
-lint: checkformat checkimports format vet staticcheck ## checks format, imports and vet
+lint: checkgoformat checkgoimports checktfformat vet staticcheck ## checks format, imports and vet
 
-checkformat: ## checks that the code is formatted correctly
+checktfformat: ## checks that Terraform HCL is formatted correctly
+	@@if [ "$$(terraform fmt -recursive --check)" ]; then \
+		echo "terraform fmt check failed: run 'make format'"; \
+		exit 1; \
+	fi
+
+checkgoformat: ## checks that the Go code is formatted correctly
 	@@if [ -n "$$(${GOFMT} -s -e -l -d .)" ]; then       \
 		echo "gofmt check failed: run 'make format'"; \
 		exit 1;                                       \
 	fi
 
-checkimports: ## checks that imports are formatted correctly
+checkgoimports: ## checks that Go imports are formatted correctly
 	@@if [ -n "$$(${GO} run golang.org/x/tools/cmd/goimports -l -d .)" ]; then \
 		echo "goimports check failed: run 'make format'";                      \
 		exit 1;                                                                \
@@ -236,3 +243,4 @@ staticcheck: ## runs staticcheck
 format: ## format the source
 	${GOFMT} -s -e -l -w .
 	${GO} run golang.org/x/tools/cmd/goimports -l -w .
+	terraform fmt --recursive

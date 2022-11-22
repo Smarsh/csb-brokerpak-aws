@@ -39,7 +39,6 @@ variable "maintenance_start_hour" { type = string }
 variable "maintenance_start_min" { type = string }
 variable "maintenance_end_hour" { type = string }
 variable "maintenance_end_min" { type = string }
-variable "use_tls" { type = bool }
 variable "deletion_protection" { type = bool }
 variable "backup_retention_period" { type = number }
 variable "backup_window" { type = string }
@@ -51,3 +50,9 @@ variable "monitoring_role_arn" { type = string }
 variable "performance_insights_enabled" { type = bool }
 variable "performance_insights_kms_key_id" { type = string }
 variable "performance_insights_retention_period" { type = number }
+variable "enable_audit_logging" { type = bool }
+variable "cloudwatch_log_group_retention_in_days" {
+  type    = number
+  default = 30
+}
+variable "cloudwatch_log_group_kms_key_id" { type = string }

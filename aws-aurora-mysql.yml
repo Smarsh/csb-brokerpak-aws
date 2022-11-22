@@ -10,11 +10,12 @@ support_url: https://aws.amazon.com/rds/aurora/
 tags: [aws, aurora, mysql, beta]
 plan_updateable: true
 provision:
+  plan_inputs: []
   user_inputs:
   - field_name: instance_name
     type: string
-    details: Name for the instance
-    default: csb-auroramy-${request.instance_id}
+    details: Name for the DB cluster
+    default: csb-auroramysql-${request.instance_id}
     constraints:
       maxLength: 98
       minLength: 6
@@ -24,31 +25,69 @@ provision:
     type: number
     details: Number of Aurora cluster instances. The first instance is a writer instance, and additional instances are readers and will be distributed across the AZs available in the region.
     default: 3
+  - field_name: db_name
+    type: string
+    details: Name for the database that Amazon RDS creates when it creates the DB instance
+    default: csbdb
+    constraints:
+      maxLength: 64
+      pattern: ^[a-z][a-z0-9-]+$
+    prohibit_update: true
   - field_name: region
     type: string
     details: The region of AWS.
     default: us-west-2
     constraints:
       examples:
-        - us-central1
-        - asia-northeast1
+      - us-central1
+      - asia-northeast1
       pattern: ^[a-z][a-z0-9-]+$
     prohibit_update: true
-  - field_name: serverless_min_capacity
-    type: number
-    nullable: true
-    details: The minimum capacity for the cluster. Must be less than or equal to `serverless_max_capacity`. Valid capacity values are in a range of 0.5 up to 128 in steps of 0.5.
-    default: null
-  - field_name: serverless_max_capacity
-    type: number
-    nullable: true
-    details: The maximum capacity for the cluster. Must be greater than or equal to `serverless_min_capacity`. Valid capacity values are in a range of 0.5 up to 128 in steps of 0.5.
-    default: null
-  - field_name: engine_version
-    type: string
-    nullable: true
+  - <<: &nullable_number
+      type: number
+      default: null
+      nullable: true
+    field_name: serverless_min_capacity
+    details: |
+      The minimum capacity for the cluster. Must be less than or equal to `serverless_max_capacity`. Valid capacity values are in a range of 0.5 up to 128 in steps of 0.5.
+      The `serverless_min_capacity` and `serverless_max_capacity` properties are ineffective without setting the `instance_class` property to a valid value.
+      Review documentation to understand the restrictions associated with the different types of instances accepted by Aurora:
+      https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.DBInstanceClass.html
+  - <<: *nullable_number
+    field_name: serverless_max_capacity
+    details: |
+      The maximum capacity for the cluster. Must be greater than or equal to `serverless_min_capacity`. Valid capacity values are in a range of 0.5 up to 128 in steps of 0.5.
+      The `serverless_min_capacity` and `serverless_max_capacity` properties are ineffective without setting the `instance_class` property to a valid value for Aurora Serverless v2.
+      Review documentation to understand the restrictions associated with the different types of instances accepted by Aurora:
+      https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.DBInstanceClass.html
+  - <<: &nullable_string
+      type: string
+      default: null
+      nullable: true
+    field_name: engine_version
     details: The Aurora engine version, e.g. "8.0.mysql_aurora.3.02.0". Not all features are supported by all versions. Refer to the AWS documentation for more details.
-    default: null
+  - field_name: allow_major_version_upgrade
+    type: boolean
+    details: Allow major version upgrades. Changing this parameter does not result in an outage and the change is asynchronously applied as soon as possible.
+    default: true
+  - field_name: rds_subnet_group
+    type: string
+    details: AWS RDS subnet group already in existence to use
+    default: ""
+    prohibit_update: true
+  - field_name: rds_vpc_security_group_ids
+    type: string
+    details: Comma delimited list of security group ID's for instance
+    default: ""
+    prohibit_update: true
+  - field_name: auto_minor_version_upgrade
+    type: boolean
+    details: Allow minor version upgrades automatically during the maintenance window.
+    default: true
+  - field_name: deletion_protection
+    type: boolean
+    details: Whether deletion protection is enabled. The database cannot be deleted when this value is set.
+    default: false
   - field_name: aws_access_key_id
     type: string
     details: AWS access key
@@ -58,8 +97,175 @@ provision:
     details: AWS secret key
     default: ${config("aws.secret_access_key")}
   - field_name: aws_vpc_id
+    type: string
     details: VPC ID for instance
     default: ""
+  - field_name: copy_tags_to_snapshot
+    type: boolean
+    default: true
+    details: Copy all cluster tags to snapshots
+  - field_name: backup_retention_period
+    type: number
+    details: |
+      The number of days (1-35) for which automatic backups are kept.
+      Automated backups cannot be disabled on Aurora.
+      The backup retention period determines the period for which you can perform a point-in-time recovery.
+    default: 1
+    constraints:
+      minimum: 1
+      maximum: 35
+  - <<: *nullable_string
+    field_name: preferred_backup_window
+    details: |
+      The daily time range in UTC during which automated backups are created, e.g.: "09:46-10:16".
+      Must not overlap with the maintenance window. If not set, uses the default for the region
+      (see https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Backups.html#Aurora.Managing.Backups.BackupWindow)
+  - field_name: db_cluster_parameter_group_name
+    type: string
+    default: ""
+    details: |
+      The DB cluster parameter group contains the set of engine configuration parameters that apply throughout the Aurora DB cluster.
+      The DB cluster parameter group also contains default settings for the DB parameter group for the DB instances that make up the cluster.
+  - field_name: enable_audit_logging
+    type: boolean
+    default: false
+    details: |
+      Requires setting db_cluster_parameter_group_name with a pre-created DB cluster parameter group that fulfills requirements for audit log exports. 
+      See AWS Docs for more info: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Auditing.html
+      If set will enable the `audit` cloud_watch_log_export on the cluster.
+  - field_name: cloudwatch_log_group_retention_in_days
+    type: number
+    details: |
+      Used in conjunction with `enable_audit_logging`. If provided will set the retention days for the log group containing the RDS audit logs. Defaults to 30 Days.
+    default: 30
+    constraints:
+      minimum: 1
+      maximum: 3653 #10y
+  - field_name: cloudwatch_log_group_kms_key_id
+    type: string
+    default: ""
+    details: Used in conjunction with `enable_audit_logging`. If provided will set the KSM key to use for encrypting the Cloudwatch log group created for the RDS audit logs.
+  - field_name: monitoring_interval
+    type: number
+    details: |
+      The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance.
+      To disable collecting Enhanced Monitoring metrics, specify 0. Valid Values: 0, 1, 5, 10, 15, 30, 60.
+      A `monitoring_role_arn` value is required if you specify a `monitoring_interval` value other than 0.
+      To read about Enhanced Monitoring metrics see https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_Monitoring.OS.html
+    default: 0
+    constraints:
+      maximum: 60
+      minimum: 0
+  - field_name: monitoring_role_arn
+    type: string
+    details: |
+      Enhanced Monitoring requires permission to act on your behalf to send OS metric information to CloudWatch Logs.
+      This property represents the ARN for the IAM role that permits RDS to send enhanced monitoring metrics to CloudWatch Logs.
+      To read about Enhanced Monitoring metrics see https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_Monitoring.OS.html
+    default: ""
+  - field_name: performance_insights_enabled
+    type: boolean
+    details: Specifies whether Performance Insights are enabled (see https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.html).
+    default: false
+  - field_name: performance_insights_kms_key_id
+    type: string
+    details: |
+      The ARN for the KMS key to encrypt Performance Insights data.
+      When specifying `performance_insights_kms_key_id`, `performance_insights_enabled` needs to be set to true.
+      Once KMS key is set, it can never be changed.
+    default: ""
+  - field_name: performance_insights_retention_period
+    type: number
+    details: |
+      The number of days to retain Performance Insights data.
+      When specifying `performance_insights_retention_period`, `performance_insights_enabled` needs to be set to true.
+      The default is 7 days.
+      The following values are valid: 7, month * 31, where month is a number of months from 1-23, 731.
+      For example, the following values are valid: 93 (3 months * 31), 341 (11 months * 31), 589 (19 months * 31), and 731.
+      If you specify a retention period such as 94, which is not a valid value, RDS issues an error.
+    default: 7
+    constraints:
+      minimum: 7
+  - field_name: instance_class
+    type: string
+    details: |
+      The DB instance class determines the computation and memory capacity of an Amazon Aurora DB instance.
+      Review documentation to understand the restrictions associated with the different types of instances accepted by Aurora:
+      https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.DBInstanceClass.html
+    required: true
+  - field_name: storage_encrypted
+    type: boolean
+    default: true
+    details: |
+      Specifies whether a DB cluster is encrypted. The default is true. This parameter cannot be updated.
+    prohibit_update: true
+  - field_name: kms_key_id
+    type: string
+    default: ""
+    prohibit_update: true
+    details: |
+      The ARN for the KMS encryption key. When specifying kms_key_id, storage_encrypted needs to be set to true.
+  - <<: *nullable_string
+    field_name: preferred_maintenance_day
+    details: The preferred maintenance day
+    enum:
+      Sun: Sunday
+      Mon: Monday
+      Tue: Tuesday
+      Wed: Wednesday
+      Thu: Thursday
+      Fri: Friday
+      Sat: Saturday
+  - <<: *nullable_string
+    field_name: preferred_maintenance_start_hour
+    details: The preferred maintenance start hour
+    enum: &hour_enum
+      "00": 12 am
+      "01": 1 am
+      "02": 2 am
+      "03": 3 am
+      "04": 4 am
+      "05": 5 am
+      "06": 6 am
+      "07": 7 am
+      "08": 8 am
+      "09": 9 am
+      "10": 10 am
+      "11": 11 am
+      "12": 12 pm
+      "13": 1 pm
+      "14": 2 pm
+      "15": 3 pm
+      "16": 4 pm
+      "17": 5 pm
+      "18": 6 pm
+      "19": 7 pm
+      "20": 8 pm
+      "21": 9 pm
+      "22": 10 pm
+      "23": 11 pm
+  - <<: *nullable_string
+    field_name: preferred_maintenance_start_min
+    type: string
+    details: The preferred maintenance start minute
+    enum: &minute_enum
+      "00": Top of the hour
+      "15": 15 minutes
+      "30": 30 minutes
+      "45": 45 minutes
+  - <<: *nullable_string
+    field_name: preferred_maintenance_end_hour
+    details: The preferred maintenance end hour
+    enum: *hour_enum
+  - <<: *nullable_string
+    field_name: preferred_maintenance_end_min
+    details: The preferred maintenance end minute
+    enum: *minute_enum
+  computed_inputs:
+  - name: labels
+    default: ${json.marshal(request.default_labels)}
+    overwrite: true
+    type: object
   template_refs:
     outputs: ./terraform/aurora-mysql/provision/outputs.tf
     provider: ./terraform/aurora-mysql/provision/provider.tf
@@ -73,7 +279,10 @@ provision:
     details: The name of the database.
   - field_name: hostname
     type: string
-    details: Hostname or IP address of the exposed MySQL endpoint used by clients to connect to the service.
+    details: Hostname or IP address of the exposed writer MySQL endpoint used by clients to connect to the service.
+  - field_name: reader_hostname
+    type: string
+    details: Hostname or IP address of the exposed reader MySQL endpoint used by clients to connect to the service.
   - field_name: username
     type: string
     details: The username to authenticate to the database instance.
@@ -85,7 +294,11 @@ provision:
     details: The port number of the exposed database instance.
 bind:
   plan_inputs: []
-  user_inputs: []
+  user_inputs:
+  - field_name: reader_endpoint
+    type: boolean
+    details: Expose the Aurora reader endpoint, which is balanced across Reader and Writer instances
+    default: false
   computed_inputs:
   - name: name
     type: string
@@ -94,6 +307,10 @@ bind:
   - name: hostname
     type: string
     default: ${instance.details["hostname"]}
+    overwrite: true
+  - name: reader_hostname
+    type: string
+    default: ${instance.details["reader_hostname"]}
     overwrite: true
   - name: admin_username
     type: string
