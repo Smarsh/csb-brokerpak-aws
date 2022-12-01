@@ -40,7 +40,7 @@ var _ = Describe("Aurora PostgreSQL", Label("aurora-postgresql"), func() {
 		service := testframework.FindService(catalog, serviceName)
 		Expect(service.ID).NotTo(BeNil())
 		Expect(service.Name).NotTo(BeNil())
-		Expect(service.Tags).To(ConsistOf("aws", "postgres", "postgresql", "aurora", "beta"))
+		Expect(service.Tags).To(ConsistOf("aws", "postgres", "postgresql", "aurora"))
 		Expect(service.Metadata.ImageUrl).NotTo(BeNil())
 		Expect(service.Metadata.DisplayName).NotTo(BeNil())
 		Expect(service.Plans).To(
@@ -81,6 +81,11 @@ var _ = Describe("Aurora PostgreSQL", Label("aurora-postgresql"), func() {
 				"database name maximum length is 64 characters",
 				map[string]any{"db_name": stringOfLen(65)},
 				"db_name: String length must be less than or equal to 64",
+			),
+			Entry(
+				"database name invalid characters",
+				map[string]any{"db_name": ".aaaaa"},
+				"db_name: Does not match pattern '^[a-z][a-z0-9_]+$'",
 			),
 			Entry(
 				"monitoring_interval maximum value is 60",
@@ -138,7 +143,7 @@ var _ = Describe("Aurora PostgreSQL", Label("aurora-postgresql"), func() {
 		It("should allow properties to be set on provision", func() {
 			_, err := broker.Provision(serviceName, "custom-sample", map[string]any{
 				"instance_name":                         "csb-aurora-postgres-fake-name",
-				"db_name":                               "fake-db-name",
+				"db_name":                               "fakedbname",
 				"region":                                "africa-north-4",
 				"cluster_instances":                     12,
 				"serverless_min_capacity":               0.2,
@@ -168,7 +173,7 @@ var _ = Describe("Aurora PostgreSQL", Label("aurora-postgresql"), func() {
 			Expect(mockTerraform.FirstTerraformInvocationVars()).To(
 				SatisfyAll(
 					HaveKeyWithValue("instance_name", "csb-aurora-postgres-fake-name"),
-					HaveKeyWithValue("db_name", "fake-db-name"),
+					HaveKeyWithValue("db_name", "fakedbname"),
 					HaveKeyWithValue("region", "africa-north-4"),
 					HaveKeyWithValue("cluster_instances", BeNumerically("==", 12)),
 					HaveKeyWithValue("serverless_min_capacity", BeNumerically("==", 0.2)),
