@@ -255,44 +255,6 @@ provision:
   - field_name: tags_all
     type: string
     details: A map of tags assigned to the resource, including those inherited from the provider default_tags configuration block.
-bind:
-  plan_inputs: []
-  user_inputs: 
-  - field_name: 
-    type: 
-    details: 
-    default: 
-  - field_name: 
-    type: 
-    details: 
-    default:   
-  computed_inputs:
-  - name: arn
-    default: ${instance.details["arn"]}
-    overwrite: true
-    type: string
-  - name: region
-    default: ${instance.details["region"]}
-    overwrite: true
-    type: string
-  - name: 
-    default: 
-    overwrite: 
-    type: 
-  template_refs:
-    data: terraform/docdb/bind/data.tf
-    main: terraform/docdb/bind/main.tf
-    outputs: terraform/docdb/bind/outputs.tf
-    provider: terraform/docdb/bind/provider.tf
-    versions: terraform/docdb/bind/versions.tf
-    variables: terraform/docdb/bind/variables.tf
-  outputs:
-  - field_name: 
-    type: 
-    details: 
-  - field_name: 
-    type: 
-    details: 
 examples:
 - name: 
   description: 
