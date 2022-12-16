@@ -24,10 +24,10 @@ output "cluster_members" {
   value = aws_docdb_cluster.docdb_cluster.cluster_members
 }
 
-output "cluster_resource_id" {
-  description = "The DocDB Cluster Resource ID"
-  value = aws_docdb_cluster.docdb_cluster.cluster_resource_id
-}
+#output "cluster_resource_id" {
+#  description = "The DocDB Cluster Resource ID"
+#  value = aws_docdb_cluster.docdb_cluster.cluster_resource_id
+#}
 
 output "endpoint" {
   description = "The DNS address of the DocDB instance"
@@ -51,49 +51,47 @@ output "reader_endpoint" {
 
 # docdb_cluster_instances outputs
 
-  output "db_subnet_group_name" {
-  description = "The DB subnet group to associate with this DB instance"
-  value = aws_docdb_cluster_instance.docdb_cluster_instances.db_subnet_group_name
-}
+#output "db_subnet_group_name" {
+#  description = "The DB subnet group to associate with this DB instance"
+#  value = aws_docdb_cluster_instance.docdb_cluster_instances.db_subnet_group_name
+#}
 
-output "dbi_resource_id" {
-  description = "The region-unique, immutable identifier for the DB instance"
-  value = aws_docdb_cluster_instance.docdb_cluster_instances.dbi_resource_id
-}
+#output "dbi_resource_id" {
+#  description = "The region-unique, immutable identifier for the DB instance"
+#  value = aws_docdb_cluster_instance.docdb_cluster_instances.dbi_resource_id
+#}
 
-output "cluster_instance_endpoint" {
-  description = "The DNS address for this instance. May not be writable"
-  value = aws_docdb_cluster_instance.docdb_cluster_instances.endpoint
-}
+#output "cluster_instance_endpoint" {
+#  description = "The DNS address for this instance. May not be writable"
+#  value = aws_docdb_cluster_instance.docdb_cluster_instances.endpoint
+#}
 
-output "engine_version" {
-  description = "The database engine version"
-  value = aws_docdb_cluster_instance.docdb_cluster_instances.engine_version
-}
+#output "engine_version" {
+#  description = "The database engine version"
+#  value = aws_docdb_cluster_instance.docdb_cluster_instances.engine_version
+#}
 
-output "port" {
-  description = "The database port"
-  value = aws_docdb_cluster_instance.docdb_cluster_instances.port
-}
+#output "port" {
+#  description = "The database port"
+#  value = aws_docdb_cluster_instance.docdb_cluster_instances.port
+#}
 
-output "preferred_backup_window" {
-  description = "The daily time range during which automated backups are created if automated backups are enabled"
-  value = aws_docdb_cluster_instance.docdb_cluster_instances.preferred_backup_window
-}
+#output "preferred_backup_window" {
+#  description = "The daily time range during which automated backups are created if automated backups are enabled"
+#  value = aws_docdb_cluster_instance.docdb_cluster_instances.preferred_backup_window
+#}
 
-output "storage_encrypted " {
-  description = "Specifies whether the DB cluster is encrypted"
-  value = aws_docdb_cluster_instance.docdb_cluster_instances.storage_encrypted
-}
+#output "storage_encrypted " {
+#  description = "Specifies whether the DB cluster is encrypted"
+#  value = aws_docdb_cluster_instance.docdb_cluster_instances.storage_encrypted
+#}
 
-output "writer" {
-  description = " Boolean indicating if this instance is writable. False indicates this instance is a read replica"
-  value = aws_docdb_cluster_instance.docdb_cluster_instances.writer
-}
+#output "writer" {
+#  description = " Boolean indicating if this instance is writable. False indicates this instance is a read replica"
+#  value = aws_docdb_cluster_instance.docdb_cluster_instances.writer
+#}
 
-output "ca_cert_identifier" {
-  description = "(Optional) The identifier of the CA certificate for the DB instance."
-  value = aws_docdb_cluster_instance.docdb_cluster_instances.ca_cert_identifier
-}
-
-
+#output "ca_cert_identifier" {
+#  description = "(Optional) The identifier of the CA certificate for the DB instance."
+#  value = aws_docdb_cluster_instance.docdb_cluster_instances.ca_cert_identifier
+#}

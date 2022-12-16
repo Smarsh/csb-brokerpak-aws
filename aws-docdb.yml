@@ -232,9 +232,6 @@ provision:
   - field_name: endpoint
     type: string
     details: The DNS address of the DocDB instance
-  - field_name: reader_endpoint
-    type: string
-    details: The DNS address of the DocDB instance
   - field_name: hosted_zone_id
     type: string
     details: The Route53 Hosted Zone ID of the endpoint
