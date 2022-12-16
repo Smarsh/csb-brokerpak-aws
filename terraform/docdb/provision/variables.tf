@@ -27,3 +27,8 @@ variable "vpc_security_group_ids" { type = string }
 variable "instances" { type = number }
 variable "identifier" { type = string }
 variable "instance_class" { type = string }
+
+# provider
+variable "aws_access_key_id" { type = string }
+variable "aws_secret_access_key" { type = string }
+variable "region" { type = string }
