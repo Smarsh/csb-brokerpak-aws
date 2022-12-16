@@ -95,3 +95,5 @@ output "ca_cert_identifier" {
   description = "(Optional) The identifier of the CA certificate for the DB instance."
   value = aws_docdb_cluster_instance.docdb_cluster_instances.ca_cert_identifier
 }
+
+

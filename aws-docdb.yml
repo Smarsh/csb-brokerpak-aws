@@ -72,18 +72,18 @@ plans:
   properties:
     subsume: false
 provision:
-  plan _inputs:
+  plan_inputs:
   user_inputs:
     - field_name: master_username
       type: string
       details: (Required) User name for connecting to the cluster
-      default: _______
+      default: "admin"
       plan_updateable: true
       prohibit_update: true
     - field_name: master_password
       type: string
       details: (Required) Password for connecting to the cluster
-      default: _______
+      default: "password"
       plan_updateable: true
       prohibit_update: true
     - field_name: apply_immediately
@@ -93,33 +93,27 @@ provision:
       plan_updateable: true
       prohibit_update: true
     - field_name: availability_zones
-      type: (Optional) A list of EC2 Availability Zones that instances in the DB cluster can be created in.
-      details: 
-      default: 
+      type: list
+      details: (Optional) A list of EC2 Availability Zones that instances in the DB cluster can be created in.
+      default: "us-west-1a, us-west-1b, us-west-1c"
       plan_updateable: true
       prohibit_update: true
     - field_name: backup_retention_period
-      type: 
+      type: number
       details: (Optional) The days to retain backups for. Default 1
-      default: 1
-      plan_updateable: true
-      prohibit_update: true
-    - field_name: cluster_identifier_prefix
-      type: string
-      details: (Optional, Forces new resource) Creates a unique cluster identifier beginning with the specified prefix. Conflicts with cluster_identifier.
-      default: _______
+      default: 5
       plan_updateable: true
       prohibit_update: true
     - field_name: cluster_identifier
       type: string
       details: (Optional, Forces new resources) The cluster identifier. If omitted, Terraform will assign a random, unique identifier.
-      default: _______
+      default: "ClusterName"
       plan_updateable: true
       prohibit_update: true
     - field_name: db_subnet_group_name
       type: string
       details: (Optional) A DB subnet group to associate with this DB instance.
-      default: _______
+      default: 
       plan_updateable: true
       prohibit_update: true
     - field_name: db_cluster_parameter_group_name
@@ -143,13 +137,13 @@ provision:
     - field_name: engine_version
       type: string
       details: (Optional) The database engine version. Updating this argument results in an outage.
-      default: ${docdb_version}
+      default: "3.6.0"
       plan_updateable: true
       prohibit_update: true
     - field_name: engine
       type: string
       details: (Optional) The name of the database engine to be used for this DB cluster. Defaults to docdb. Valid value is docdb.
-      default: docdb
+      default: "docdb"
       plan_updateable: true
       prohibit_update: true
     - field_name: final_snapshot_identifier
@@ -168,7 +162,6 @@ provision:
       type: string
       details: (Optional) The ARN for the KMS encryption key. When specifying kms_key_id, storage_encrypted needs to be set to true.
       default: 
-      plan_updateable: true
       prohibit_update: true
     - field_name: port 
       type: 
@@ -195,27 +188,26 @@ provision:
       plan_updateable: true
       prohibit_update: true
     - field_name: snapshot_identifier
-      type: 
+      type: string
       details: (Optional) Specifies whether or not to create this cluster from a snapshot. You can use either the name or ARN when specifying a DB cluster snapshot, or the ARN when specifying a DB snapshot.
       default: 
       plan_updateable: true
       prohibit_update: true
     - field_name: storage_encrypted
-      type: 
+      type: boolean
       details: (Optional) Specifies whether the DB cluster is encrypted. The default is false.
-      default: false
-      plan_updateable: true
+      default: true
       prohibit_update: true
     - field_name: tags
-      type: 
+      type: string
       details: (Optional) A map of tags to assign to the DB cluster. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
       default: 
       plan_updateable: true
       prohibit_update: true
     - field_name: vpc_security_group_ids 
-      type: 
+      type: string
       details: (Optional) List of VPC security groups to associate with the Cluster
-      default: 
+      default: ""
       plan_updateable: true
       prohibit_update: true
   computed_inputs:
@@ -231,20 +223,20 @@ provision:
     variables: terraform/docdb/provision/variables.tf
     data: terraform/docdb/provision/data.tf
   outputs:
-  - field_name: arn
+  - field_name: docdb_cluster_arn
     type: string
     details: Amazon Resource Name (ARN) of cluster
   - field_name: cluster_members
     type: string
     details: List of DocDB Instances that are a part of this cluster
-  - field_name: cluster_resource_id
-    type: string
-    details: The DocDB Cluster Resource ID
   - field_name: endpoint
     type: string
     details: The DNS address of the DocDB instance
+  - field_name: reader_endpoint
+    type: string
+    details: The DNS address of the DocDB instance
   - field_name: hosted_zone_id
-    type: 
+    type: string
     details: The Route53 Hosted Zone ID of the endpoint
   - field_name: id
     type: string
@@ -252,18 +244,3 @@ provision:
   - field_name: reader_endpoint
     type: string
     details: A read-only endpoint for the DocDB cluster, automatically load-balanced across replicas
-  - field_name: tags_all
-    type: string
-    details: A map of tags assigned to the resource, including those inherited from the provider default_tags configuration block.
-examples:
-- name: 
-  description: 
-  plan_id: 
-  provision_params: {}
-  bind_params: {}
-- name: 
-  description: 
-  plan_id: 
-  provision_params: {}
-  bind_params: {}
-  
