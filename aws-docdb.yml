@@ -93,13 +93,13 @@ provision:
       plan_updateable: true
       prohibit_update: true
     - field_name: availability_zones
-      type: list
+      type: string
       details: (Optional) A list of EC2 Availability Zones that instances in the DB cluster can be created in.
-      default: "us-west-1a, us-west-1b, us-west-1c"
+      default: "eu-west-1a, eu-west-1b, eu-west-1c"
       plan_updateable: true
       prohibit_update: true
     - field_name: backup_retention_period
-      type: number
+      type: integer
       details: (Optional) The days to retain backups for. Default 1
       default: 5
       plan_updateable: true
@@ -164,9 +164,9 @@ provision:
       default: 
       prohibit_update: true
     - field_name: port 
-      type: 
+      type: number
       details: (Optional) The port on which the DB accepts connections
-      default: 
+      default: 27017
       plan_updateable: true
       prohibit_update: true
     - field_name: preferred_backup_windowv
@@ -199,7 +199,7 @@ provision:
       default: true
       prohibit_update: true
     - field_name: tags
-      type: string
+      type: array
       details: (Optional) A map of tags to assign to the DB cluster. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
       default: 
       plan_updateable: true
