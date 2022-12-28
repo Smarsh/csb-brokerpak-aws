@@ -169,7 +169,7 @@ provision:
       default: 27017
       plan_updateable: true
       prohibit_update: true
-    - field_name: preferred_backup_windowv
+    - field_name: preferred_backup_window
       type: string
       details: (Optional) The daily time range during which automated backups are created if automated backups are enabled using the BackupRetentionPeriod parameter. Time in UTC Default is a 30-minute window selected at random from an 8-hour block of time per region E.g., 04:00-09:00
       default: 
@@ -207,6 +207,42 @@ provision:
     - field_name: vpc_security_group_ids 
       type: string
       details: (Optional) List of VPC security groups to associate with the Cluster
+      default: ""
+      plan_updateable: true
+      prohibit_update: true
+    - field_name: identifier
+      type: string
+      details: Missing field. Placeholder?
+      default: ""
+      plan_updateable: true
+      prohibit_update: true
+    - field_name: instances
+      type: string
+      details: Missing field. Placeholder?
+      default: ""
+      plan_updateable: true
+      prohibit_update: true
+    - field_name: instance_class
+      type: string
+      details: Missing field. Placeholder?
+      default: ""
+      plan_updateable: true
+      prohibit_update: true
+    - field_name: aws_access_key_id
+      type: string
+      details: Missing field. Placeholder?
+      default: ""
+      plan_updateable: true
+      prohibit_update: true
+    - field_name: aws_secret_access_key
+      type: string
+      details: Missing field. Placeholder?
+      default: ""
+      plan_updateable: true
+      prohibit_update: true
+    - field_name: region
+      type: string
+      details: Missing field. Placeholder?
       default: ""
       plan_updateable: true
       prohibit_update: true
