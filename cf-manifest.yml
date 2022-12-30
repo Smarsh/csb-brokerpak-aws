@@ -16,10 +16,11 @@
 
 ---
 applications:
-- name: ((app))
-  command: ./cloud-service-broker serve
+- name: cloud-service-broker-aws-1.4.0
+  command: ./cloud-service-broker --config config.yml serve
   memory: 2G
   disk_quota: 2G
   buildpacks: 
   - binary_buildpack
   random-route: true
+  path: broker.zip

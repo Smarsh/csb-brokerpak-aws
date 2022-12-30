@@ -1,0 +1,20 @@
+service.csb-aws-mysql.plans: |
+  [{"name":"small","id":"2268ce43-7fd7-48dc-be2f-8611e11fb12e","description":"MySQL v5.7, minimum 2 cores, minimum 4GB ram, 5GB storage","display_name":"small","cores":2,"storage_gb":5,"storage_type":"gp2","mysql_version":5.7,"storage_encrypted":false,"multi_az":false,"storage_autoscale":false},{"name":"medium","id":"f2ae0bb7-6921-43b7-bae7-6d1fe1c5d1c6","description":"MySQL 5.7, minimum 4 cores, minimum 8GB ram, 10GB storage","display_name":"medium","cores":4,"storage_gb":10,"storage_type":"gp2","mysql_version":5.7,"storage_encrypted":false,"multi_az":false,"storage_autoscale":false},{"name":"large","id":"a5fea013-e87f-488f-969d-1cf038881b57","description":"MySQL 5.7, minimum 8 cores, minimum 16GB ram, 20GB storage","display_name":"large","cores":8,"storage_gb":20,"storage_type":"gp2","mysql_version":5.7,"storage_encrypted":false,"multi_az":false,"storage_autoscale":false}]
+
+service.csb-aws-postgresql.plans: |
+  [{"name":"small","id":"ffc51616-228b-41bd-bed1-d601c18d58f5","description":"PostgreSQL 11, minimum 2 cores, minimum 4GB ram, 5GB storage","display_name":"small","cores":2,"storage_gb":5,"storage_type":"gp2","postgres_version":11},{"name":"medium","id":"e64d07f9-ceb2-40a6-abd9-391047fa3cf5","description":"PostgreSQL 11, minimum 4 cores, minimum 8GB ram, 10GB storage","display_name":"medium","cores":4,"storage_gb":10,"storage_type":"gp2","postgres_version":11},{"name":"large","id":"48baef10-a14c-4ae1-aab5-25f26eba941a","description":"PostgreSQL 11, minimum 8 cores, minimum 16GB ram, 20GB storage","display_name":"large","cores":8,"storage_gb":20,"storage_type":"gp2","postgres_version":11}]
+
+service.csb-aws-redis.plans: |
+  []
+
+service.csb-aws-dynamodb: |
+  []
+
+service.csb-aws-s3-bucket.plans: |
+  [{"name":"private","id":"8938b4c0-d67f-4c34-9f68-a66deef99b4e","description":"Private S3 bucket","display_name":"Private","acl":"private","boc_object_ownership":"ObjectWriter"},{"name":"public-read","id":"04317eaa-11ac-4c5f-b77f-eb005fe977fe","description":"Public-read S3 bucket","display_name":"Public Read","acl":"public-read","boc_object_ownership":"ObjectWriter"}]
+
+service.csb-aws-aurora-postgresql.plans: |
+  [{"name":"example-basic-plan","id":"d20c5cf2-29e1-11ed-93da-1f3a67a06903","description":"An example of a simple Aurora Postgres plan. Replace with your own plan configuration."}]
+
+service.csb-aws-aurora-mysql.plans: |
+  [{"name":"example-basic-plan","id":"10b2bd92-2a0b-11ed-b70f-c7c5cf3bb719","description":"An example of a simple Aurora MySQL plan. Replace with your own plan configuration."}]
